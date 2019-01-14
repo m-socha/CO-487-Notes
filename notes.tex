@@ -321,4 +321,69 @@
       AES is the most widely used production SKES. Established in 2001 by the US National Institute of Standards and Technology (NIST), AES is a block cipher using 128 bit
       blocks and supports key sizes of 128, 192, and 256 bits.
 
+  \section{Hash Functions}
+    A hash function is a mapping of a message of an arbitrary length to a message of fixed length. An n-bit hash function $H$ can be defined as
+    $H : \{0, 1\}^{\leq L} \rightarrow \{0, 1\}^n$. Generally speaking, $L$ is very large while $n$ is fairly small. The output of a hash function is known as a hash value
+    or message digest.
+
+    \subsection{Desirable Properties}
+      A few desirable properties hash functions for cryptography applications are:
+      \begin{itemize}
+        \item \textbf{Efficiency:} $H(x)$ can be computed quickly for all valid inputs $x$.
+        \item \textbf{Preimage resistance:} Given a hash value $y \in \{0, 1\}^n$, it is computationally infeasible to find a value $x \in \{0, 1\}^{\leq L}$ such that
+          $H(x) = y$ (i.e. the hash function is hard to reverse). This property allows the storage of hash values of sensitive data. For example, instead of storing
+          passwords in plaintext, a login system can store hard-to-reverse hashes of passwords, and to login, the hash of the user's inputted password is compared to
+          the stored hash.
+        \item \textbf{Second preimage resistance:} Given an input $x \in \{0, 1\}^{\leq L}$, it is computationally infeasible to find another input $x' \in \{0, 1\}^{\leq L}$
+          such that $H(x') = H(x)$. This property can be used to detect if a message is edited through unauthorized means.
+        \item \textbf{Collision Resistance:} It is computationally infeasible to find two distinct inputs $x$ and $x'$ such that $H(x') = H(x)$. Such pairs $(x, x')$ are known
+          as collisions. Collision resistance requires second preimage resistance as a precondition. Also, if $H$ is somewhat uniform (i.e. outputs have a roughly equal amount
+          of corresponding inputs), then collision resistance guarantees preimage resistance.
+      \end{itemize}
+
+      A hash function that is preimage resistant is called a one-way hash function. A hash function with collision resistance is called a collision-resistant hash function.
+      A hash function that is both preimage resistant and collision resistant is called a cryptographic hash function.
+
+    \subsection{Generic Attacks}
+      Generic attacks on hash functions are attacks that do not exploit any properties specific to a hash function (i.e. the hash function is simply treated as a random function).
+
+      \subsubsection{Finding Preimages}
+        To find a preimage for a hash value $y \in \{0, 1\}^n$, random values of $x \in \{0, 1\}^{\leq L}$ need to be selected until $H(x) = L$. The expected number of values of
+        $x$ tested before a match is found is $2^n$, so this attack is computationally infeasible for large enough values of $n$ (e.g. 128).
+
+      \subsubsection{Finding Collisions}
+        To find collisions, random values $x \in \{0, 1\}^n$ can be saved along with $H(x)$. The expected number of values $x$ tested before a collision is found is roughly
+        $\sqrt{2^n} = 2^{\frac{n}{2}}$.
+
+    \subsection{Hash Functions from Block Ciphers}
+      Hash functions can be constructed from block ciphers. An example of this is the Davies-Meyer hash function, which works by splitting a message into fixed-sized blocks
+      that serve as keys for a block cipher, and then iteratively feeding the results of these block ciphers into one another. The Davies-Meyer hash function is defined as
+      follows:
+      \begin{itemize}
+        \item Let $H_0$ be some initializing value $IV$
+        \item Let $E_k$ be an m-bit block cipher with an n-bit key $k$
+        \item Let a message $x$ be broken up into $t$ n-bit blocks: $x = x_1x_2 . . . x_t$
+        \item $H_i = E_{x_i}(H_{i-1}) \oplus H_{i-1}$ for $i = 0, 1, ..., t$, and $H(x) = H_t$
+      \end{itemize}
+
+    \subsection{Merkle Meta-Method}
+      The Merkle meta-method is a technique for building iterated hash function using so-called compression functions. If the compression function $f$ is collision-resistant,
+      then so is the hash function $H$, which is defined as follows:
+        \begin{itemize}
+          \item Let $H_0$ be some initializing value $IV$
+          \item Let $f$ be a compressing function $f : \{0, 1\}^{n+r} \rightarrow \{0, 1\}^n$
+          \item Let input $x$, which has a bitlength of less than $2^r$, be divided into $t$ r-bit blocks: $x = x_1x_2 . . . x_t$
+          \item Let $x_{t+1}$ be the right-justified value of $b$. $x_{t+1}$ is referred to as a length block.
+          \item $H_i = f(H_{i-1}, x_i)$ for $i = 0, 1, ..., t + 1$, and $H(x) = H_{t+1}$
+        \end{itemize}
+
+      The Merkle meta-method simplifies the problem of building collision-resistant hash functions to one of simply building collision-resistant compression functions.
+
+    \subsection{Cryptographic Hash Functions in Production}
+      MDx (e.g. MD4, MD5) is a family of 128-bit iterated hash functions. These functions have weak collision resistance and suffer from other vulnerabilities, so their use
+      is declining.
+
+      The Secure Hash Algorithm (SHA) family of iterated hash functions developed by the NSA and NIST. SHA-1 is a 160 bit hash, but due to a collision detection algorithm
+      that takes around $2^{63}$ steps, it is being phased out in favor of the newer SHA-2 and SHA-3, which support custom hash lengths.
+
 \end{document}
