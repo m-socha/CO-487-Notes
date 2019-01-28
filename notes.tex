@@ -386,4 +386,70 @@
       The Secure Hash Algorithm (SHA) family of iterated hash functions developed by the NSA and NIST. SHA-1 is a 160 bit hash, but due to a collision detection algorithm
       that takes around $2^{63}$ steps, it is being phased out in favor of the newer SHA-2 and SHA-3, which support custom hash lengths.
 
+  \section{Message Authentication Code Schemes}
+
+    \subsection{Formulation}
+      A message authentication code (MAC) is a family of functions $H_k: \{0, 1\}^* \rightarrow \{0, 1\}^n$ parameterized with an $l$ bit key $k$. Each function $H_k$ should
+      be possible to efficiently compute, and $H_k(x)$ is known as the tag or MAC of $x$ for the key $k$.
+
+    \subsection{Applications}
+      MAC schemes can be used to provide data integrity and data origin authentication. The high-level idea is that Alice and Bob agree to some secret key $k \in \{0, 1\}^l$.
+      Alice can compute a tag $t = H_k(x)$ and send $(x, t)$ to Bob, and Bob verifies that $t = H_k(x)$. Since the adversary should not know the secret key $k$, this verification
+      is used to confirm that the message was not altered, and if it is a new message, that it originated from Alice.
+
+    \subsection{Security}
+      Although the adversary does not know $k$, they are allowed to obtain $t$ for messages $(x, t)$ that were already sent. A MAC scheme is considered secure if it is
+      computationally infeasible to compute $H_k(x_i)$ for some $x_i$ that has not yet been sent. For security purposes, each function in an ideal MAC scheme should act
+      as a random function.
+
+      Two generic types of attacks on MAC schemes are:
+      \begin{itemize}
+        \item \textbf{Guessing the MAC} of the message $x$. If $H_k(x) \in \{0, 1\}^n$ and $H_k$ acts as a random function, the probability of success is $\frac{1}{2^n}$.
+        \item \textbf{Exhaustive key search}. If $k \in \{0, 1\}^l$, then there are $2^l$ possible keys.
+      \end{itemize}
+
+    \subsection{Block Cipher MACs}
+      A common implementation of MACs using block ciphers is known as cipher block chaining MAC (CBC-MAC). The CBC-MAC algorithm is:
+      \begin{enumerate}
+        \item Divide a message $x$ into $n$ bit blocks $x_1, x_2, ..., x_n$.
+        \item Compute $H_1 = E_k(x_1)$, where $k$ is the secret key and $E$ is a block cipher.
+        \item For $i$ from $2$ to $r$, compute $H_i = E_k(H_{i-1} \oplus x)$.
+        \item $H(x) = H_r$.
+      \end{enumerate}
+
+      If $E$ is a secure encryption scheme, then CBC-MAC is a secure MAC scheme assuming that fixed-length inputs are used. If variable-length messages are allowed, then
+      CBC-MAC is susceptible to the following chosen-message attack:
+      \begin{enumerate}
+        \item Select an arbitrary $n$ bit block $x_1$.
+        \item Obtain the tag $t_1 = E_k(x_1)$.
+        \item Obtain the tag $t_2 = E_k(t_1)$. $t_2$ is the tag of the 2-block message $(x_1, 0)$, since $t_2 = E_k(0 \oplus E_k(x_1)) = E_k(E_k(x_1)) = E_k(t_1)$.
+      \end{enumerate}
+
+      Encrypted CBC-MAC is a variation of CBC-MAC where the last block is encrypted using a separate key $s$, and if $E$ is secure, encrypted CBC-MAC is secure for
+      inputs of any length.
+
+    \subsection{Hash Function MACs}
+      Hash functions were not designed to be keyed, so it is not obvious how to use them to implement MACs. The high-level idea of ``keying'' hash functions is to
+      incorporate the key in the input to the hash function.
+
+      Let $H$ be a hash function with an $n$ bit message digest, and let $n + r$ be the input blocklength of its compression function $f: \{0, 1\}^{n+r} \rightarrow \{0, 1\}^n$.
+      Let $k \in \{0, 1\}^n$ be the secret key, and let $K$ denote $k$ padded with $r - n$ 0s so that its bitlength is $r$. The key $k$ can be incorporated into hash functions
+      as follows:
+
+      \begin{itemize}
+        \item \textbf{Secret Prefix Method:} $H_k(x) = H(K, x)$. This is insecure to a length-extension attack. Suppose $(x, H_k(x))$ is known, and suppose the bitlength of $x$
+          is a multiple of $r$. Then $H(x || y)$ can be computed for any $y$ without knowledge of $k$.
+        \item \textbf{Secret Suffix Method:} $H_k(x) = H(x, K)$. This method appears to be secure, provided that $H$ is collision resistant.
+        \item \textbf{Envelope Method:} $H_k(x) = H(K, x, K)$. No exploits have been found for the envelope method.
+      \end{itemize}
+
+      \subsubsection{HMAC}
+        HMAC stands for hash-based message authentication code. Given two $r$ bit string opad and ipad, HMAC is implemented as follows:
+
+        $$H_k(x) = H(K \oplus opad, H(K \oplus ipad, x))$$
+
+        If $H$ is a secure hash function, then HMAC is secure. It is used widely in practice, typically with SHA-256 as its hash function. HMAC is also commonly used as a key
+        derivation function, where a secret key $k$ is used to compute several further session keys (e.g. $HMAC_k(1), HMAC_k(2), HMAC_k(3)$, etc). The keys appear to be randomly
+        generated, so even if an adversary discovers information about one of them, the rest remain secret.
+
 \end{document}
