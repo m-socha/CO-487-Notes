@@ -481,7 +481,8 @@
             \begin{enumerate}
               \item Let $T = 0^{128}$
               \item Compute $H = AES_k(0^{128})$.
-              \item For $i = 1$ to $v$, $T = (T \oplus A_i) \cdot H$.
+              \item For $i = 1$ to $v$, $T = (T \oplus A_i) \cdot H$. This multiplication is treated as polynomial multiplication where some binary string
+                $a = a_0 a_1 \dots a_{127}$ is represented as $a_0 + a_1 x + \dots + a_{127} x^{127}$.
               \item For $i = 1$ to $u$, $T = (T \oplus C_i) \cdot H$.
               \item $T = (T \oplus L) \cdot H$.
               \item Compute $t = AES_k(J_0) \oplus T$.
