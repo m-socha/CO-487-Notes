@@ -452,4 +452,65 @@
         derivation function, where a secret key $k$ is used to compute several further session keys (e.g. $HMAC_k(1), HMAC_k(2), HMAC_k(3)$, etc). The keys appear to be randomly
         generated, so even if an adversary discovers information about one of them, the rest remain secret.
 
+  \section{Authenticated Encryption}
+    An encryption scheme can provide confidentiality, while a MAC scheme can provide data integrity and data origin authentication. Authenticated encryption combines an encryption
+    scheme with a MAC scheme to provide all of these properties.
+
+    \subsection{Common Implementations}
+      \subsubsection{Encrypt-and-MAC}
+        For an encryption function $E_{k_1}$ and a MAC function $H_{k_2}$, Alice sends $(c, t) = (E_{k_1}(m), H_{k_2}(m))$ to Bob. Bob obtains $m = E_{k_1}^{-1}(c)$, and then verifies
+        that $t = H_{k_2}(m)$. While simple and intuitive, encrypt-and-MAC can have security vulnerabilities since there is no guarantee of data integrity on the ciphertext.
+
+      \subsubsection{Encrypt-then-MAC}
+        For an encryption function $E_{k_1}$ and a MAC function $H_{k_2}$, Alice sends $(c, t) = (E_{k_1}(m), H_{k_2}(E_{k_1}(m)))$ to Bob. Bob verifies that $t = H_{k_2}(c)$, and
+        then obtains $m = E_{k_1}^{-1}(c)$. Provided that $E$ and $H$ are from secure encryption and MAC schemes, then the encrypt-then-MAC method is secure.
+
+      \subsubsection{AES Galois/Counter Mod (GCM)}
+        AES-GCM authenticated encryption. Suppose the data to be authenticated, but not encrypted is $A = (A_1, A_2, \dots, A_v)$, and the data to be both authenticated and encrypted
+        is $M = (M_1, M_2, \dots, M_u)$. Let the secret key be $k \in \{0, 1\}^{128}$. AES-GCM is implemented as follows:
+
+        \textbf{Alice:}
+        \begin{enumerate}
+          \item Let $L = L_A || L_M$, where $L_A, L_M$ are the bitlengths of $A, M$.
+          \item Select $IV \in \{0, 1\}^{96}$ and let $J_0 = IV || 0^{31} || 1$.
+          \item Encryption:
+            \begin{enumerate}
+              \item For $i = 1$ to $u$, $J_{i} = J_{i-1} + 1$ and $C_i = AES_{k}(J_i) \oplus M_i$.
+            \end{enumerate}
+          \item Authentication:
+            \begin{enumerate}
+              \item Let $T = 0^{128}$
+              \item Compute $H = AES_k(0^{128})$.
+              \item For $i = 1$ to $v$, $T = (T \oplus A_i) \cdot H$.
+              \item For $i = 1$ to $u$, $T = (T \oplus C_i) \cdot H$.
+              \item $T = (T \oplus L) \cdot H$.
+              \item Compute $t = AES_k(J_0) \oplus T$.
+            \end{enumerate}
+          \item Output $(IV, A, C, T)$.
+        \end{enumerate}
+
+        \textbf{Bob:}
+        \begin{enumerate}
+          \item Let $L = L_A || L_M$, where $L_A, L_M$ are the bitlengths of $A, M$.
+          \item Let $J_0 = IV || 0^{31} || 1$.
+          \item Authentication:
+            \begin{enumerate}
+              \item Let $T = 0^{128}$
+              \item Compute $H = AES_k(0^{128})$.
+              \item For $i = 1$ to $v$, $T = (T \oplus A_i) \cdot H$.
+              \item For $i = 1$ to $u$, $T = (T \oplus C_i) \cdot H$.
+              \item $T = (T \oplus L) \cdot H$.
+              \item Compute $t' = AES_k(J_0) \oplus T$.
+              \item Accept if $t' = t$, else reject.
+            \end{enumerate}
+          \item Decryption:
+            \begin{enumerate}
+              \item For $i = 1$ to $u$, $J_{i} = J_{i-1} + 1$ and $M_i = AES_{k}(J_i) \oplus C_i$.
+            \end{enumerate}
+          \item Output $(A, M)$
+        \end{enumerate}
+
+        AES-GCM is secure, and because its encryption and decryption operations can be parallelized, it can be more efficient than algorithms such as encrypt-then-MAC. AES-GCM also
+        supports authenticating but not encrypting pieces of data (e.g. a header section containing metadata).
+
 \end{document}
