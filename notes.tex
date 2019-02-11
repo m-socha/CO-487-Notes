@@ -514,4 +514,78 @@
         AES-GCM is secure, and because its encryption and decryption operations can be parallelized, it can be more efficient than algorithms such as encrypt-then-MAC. AES-GCM also
         supports authenticating but not encrypting pieces of data (e.g. a header section containing metadata).
 
+  \section{Introduction to Public-Key Cryptography}
+
+    \subsection{Drawbacks of Symmetric-Key Cryptography}
+
+      \subsubsection{Key Establishment}
+        Common ways for establishing keys in SKES are:
+        \begin{itemize}
+          \item \textbf{Point-to-point key distribution.} This involves Alice selecting a key and sending it to Bob over
+            some secure channel, such as a trusted courier or in some face-to-face meeting. These methods do not scale
+            well to an increased number of participants.
+          \item \textbf{Using a trusted third part (TTP).} A key distribution center (KDC) can be used as a centralized
+            store for keys, and users authenticate against it to retrieve keys. However, the KDC is a single point of
+            failure and is an attractive target for attacks.
+        \end{itemize}
+
+      \subsubsection{Key Management}
+        A network of $n$ users has ${n \choose 2} \in \theta(n^2)$ possible communication channels, so the number of
+        key pairs to maintain grows quadratically to the number of users.
+
+      \subsubsection{Implementing Non-Repudiation}
+        Symmetric-key encryption schemes cannot be used to achieve non-repudiation on their own.
+
+    \subsection{Public-Key Cryptography}
+      It used to be widely believed in the cryptography community that in order for two parties to communicate securely
+      over an insecure network, they need to first exchange some secret information. This was challenged by Ralph Merkle
+      in 1974, when he demonstrated that two parties can establish a secret key by communicating over an authenticated
+      but insecure channel. Merkle's first public-key cryptography construction, known as a Merkle Puzzle, is described
+      as follows:
+      \begin{enumerate}
+        \item Alice creates $N$ puzzles $P_1, P_2, \dots, P_N$, each of which take a substantial amount of time to solve.
+          $N$ is very large. Solving a puzzle reveals a session key $sk_i$ and a serial number $n_i$.
+        \item Alice sends $P_1, P_2, \dots, P_N$ to Bob.
+        \item Bob obtains $j \in \{1, 2, \dots N\}$ at random and solves puzzle $P_j$ to obtain $sk_j$ and $n_j$.
+        \item Bob sends $n_j$ to Alice.
+        \item The secret session key is the one corresponding to $n_j$ (i.e. $sk_j$).
+      \end{enumerate}
+
+      \subsubsection{Formulation}
+        In general, key pairs for public-key cryptography work as follows:
+        \begin{enumerate}
+          \item Each entity $A$ generates a key pair $(P_A, S_A)$. $P_A$ is known as the public key and is not secret,
+            while and $S_A$ is known as the private key and should remain secret. It should be infeasible to recover
+            $S_A$ from $P_A$.
+          \item To encrypt messages for Bob, Alice obtains an authentic copy of Bob's $P_B$, computes $c = E(P_B, m)$,
+            where $E$ is some encryption function, and sends $c$ to Bob.
+          \item To decrypt $c$, Bob computes $m = D(S_B, c)$, where $D$ is some decryption function.
+        \end{enumerate}
+
+      \subsubsection{Digital Signatures}
+        Public-key cryptography also supports signing messages. Signing a message works as follows:
+        \begin{enumerate}
+          \item Alice computes $s = Sign(S_A, m)$ and sends $m$ and $s$ to Bob, where Sign is some function used
+            for digital signatures.
+          \item Bob obtains an authentic copy of $P_A$, and accepts if the output of $Verify(P_A, m, s)$ is
+            acceptable, where Verify is some function for verifying digital signatures.
+        \end{enumerate}
+
+      \subsubsection{Advantages over Symmetric-key Cryptography}
+        Public-key cryptography addresses many of the drawbacks of symmetric-key cryptography. In particular, public
+        key cryptography has the following advantages over SKES:
+        \begin{itemize}
+          \item It does not require a secure communication channel for key establishment.
+          \item Each user maintains a single key pair for decrypting messages from any other user.
+          \item A signed message an be verified by anyone, since the secret key does not need to be known.
+          \item Digital signatures can also be used to implement non-repudiation.
+        \end{itemize}
+
+        The main drawback of public-key cryptography is that is it typically more computationally intensive than
+        symmetric-key cryptography.
+
+      \subsubsection{Hybrid Schemes}
+        Public-key and symmetric-key encryption schemes are often used together. For example, an encryption scheme
+        could encrypt some symmetric key $k$ using public-key encryption.
+
 \end{document}
