@@ -2,6 +2,7 @@
 \usepackage[margin=1in]{geometry}
 \usepackage{parskip}
 \usepackage{float}
+\usepackage{amsmath}
 
 \let\stdsection\section
 \renewcommand\section{\clearpage\stdsection}
@@ -587,5 +588,67 @@
       \subsubsection{Hybrid Schemes}
         Public-key and symmetric-key encryption schemes are often used together. For example, an encryption scheme
         could encrypt some symmetric key $k$ using public-key encryption.
+
+  \section{RSA}
+
+    \subsection{RSA Public-Key Encryption Scheme}
+            
+      \subsubsection{Key Generation}
+        Alice generates a public-private key pair as follows:
+        \begin{enumerate}
+          \item Alice selects two prime numbers $p, q$.
+          \item Let $n = pq$, and let $\phi(n) = (p - 1)(q - 1)$.
+          \item Alice selects some $e$ such that $gcd(e, \phi(n)) = 1$.
+          \item Alice solves $ed = 1 \mod \phi(n)$.
+          \item Alice's public key is $(n, e)$, and the private key is $d$.
+        \end{enumerate}
+
+      \subsubsection{Encryption and Decryption}
+        Bob encrypts some text $m$ to send to Alice as follows:
+        \begin{enumerate}
+          \item Bob obtains Alice's public key $(n, e)$.
+          \item Bob computes $c = m^e \mod n$.
+          \item Bob sends ciphertext $c$ to Alice.
+        \end{enumerate}
+
+        Alice decrypts ciphertext $c$ as $m = c^d \mod n$.
+
+      \subsubsection{Security}
+        The security of the RSA encryption scheme is based on that the private key $d$ should be
+        very computationally intensive to determine from public key $(n, e)$. Factoring $n$ into
+        its prime factors $p, q$ would break the scheme, but no efficient method for doing
+        so is known; the most efficient known general-purpose methods are subexponential to
+        the number of bits. To maximize resistance to factoring attacks, $p$ and $q$ should
+        be very large prime numbers of equal length.
+
+    \subsection{RSA Signature Scheme}
+      Bob signs a message $m$ as follows:
+      \begin{enumerate}
+        \item Bob computes $M = H(m)$, where $H$ is some hash function.
+        \item Bob computes $s = M^d \mod n$.
+        \item Bob sends the signed message $(m, s)$.
+      \end{enumerate}
+
+      Alice verified a message $(m, s)$ as follows:
+      \begin{enumerate}
+        \item Alice obtains an authentic copy of Bob's public key $(n,e)$.
+        \item Alice computes $M = H(m)$.
+        \item Alice computes $M' = s^e \mod n$.
+        \item Alice accepts $(m, s)$ if and only if $M = M'$.
+      \end{enumerate}
+
+      \subsubsection{Security}
+        The goal of an adversary attacking a signature scheme is to either:
+        \begin{itemize}
+          \item Totally break the scheme by recovering the private key.
+          \item Forge a signature for a single message, which is known as existential forgery.
+        \end{itemize}
+
+        A signature scheme is said to be secure if it is existentially unforgeable by a
+        computationally-bounded adversary launching a chosen-message attack.
+
+        The basic RSA signature scheme is actually not secure if SHA-256 is used for $H$.
+        To ensure security, a full-domain hash (FDH) paradigm should be used, where a message
+        $m \in \{0, 1\}^*$ is mapped to $[0, n-1]$.
 
 \end{document}
