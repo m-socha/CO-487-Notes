@@ -93,7 +93,7 @@
 
     \subsection{SKES Security}
       A security model defines the computational power of an adversary, and how they interact with the communicating parties.
-      It is generally assumes that the adversary knows everything about the SKES besides the value of $k$.
+      It is generally assumed that the adversary knows everything about the SKES besides the value of $k$.
 
       \subsubsection{Types of Attacks (Adversary Interactions)}
         \begin{itemize}
@@ -175,6 +175,7 @@
         \end{table}
 
         The Vigenere cipher is totally insecure against a chosen-plaintext attack, since the key can easily be figured out through modulo arithmetic.
+        More advanced forms of character frequency analysis also make the Vigenere cipher insecure against ciphertext-only attacks.
 
       \subsubsection{One-Time Pad}
         The one-time pad uses modulo addition with a key at least as long as the message itself. For example, if the message is $message$
@@ -193,8 +194,8 @@
           \end{tabular}
         \end{table}
 
-        The one-time pad is like the Vigenere cipher, but a different key is used to encrypt each message. This makes the one-time pad semantically secure
-        against a ciphertext-only attack, even by an adversary with unlimited resources. However, the one-time pad is impractical due to:
+        The one-time pad is like the Vigenere cipher, but a different key is used to encrypt each message. This makes the one-time pad semantically secure,
+        even by an adversary with unlimited resources. However, the one-time pad is impractical due to:
         \begin{enumerate}
           \item Its long key length
           \item Key reuse introducing a vulnerability (Since $c_1 = m_1 + k$ and $c_2 = m_2 + k$, $c_1 - c_2 = m_1 - m_2$, so if one message
@@ -239,7 +240,7 @@
         The keystream bytes are modulo added (i.e XORed) to the plaintext bytes to produce ciphertext bytes. There are known biases in the first few bytes
         of the keystream, so these bytes should be discarded.
 
-        RC4 was used for applications such as SSL and WEP. More recently, several weaknesses have been discovered, so RC4 is no longer widely used.
+        RC4 was used for applications such as SSL and WEP. More recently, some weaknesses have been discovered, so RC4 is no longer widely used.
 
     \subsection{Block Ciphers}
       Block ciphers break up a plaintext into fixed-size blocks, and then encrypt the blocks one at a time. In contrast, stream ciphers encrypt the plaintext
@@ -315,7 +316,7 @@
         is not semantically secure against chosen-plaintext attacks.
 
         Cipher block chaining (CBC) mode involves each block of plaintext being XORed with the one encrypted before it. Since identical blocks of plaintext no longer map
-        the the same ciphertext, CBC mode is secure against chosen-plaintext attacks.
+        the the same ciphertext, CBC mode is secure against block-based chosen-plaintext attacks.
 
     \subsection{Advanced Encryption Standard (AES)}
       AES is the most widely used production SKES. Established in 2001 by the US National Institute of Standards and Technology (NIST), AES is a block cipher using 128 bit
