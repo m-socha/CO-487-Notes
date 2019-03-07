@@ -414,7 +414,7 @@
       \begin{enumerate}
         \item Divide a message $x$ into $n$ bit blocks $x_1, x_2, ..., x_n$.
         \item Compute $H_1 = E_k(x_1)$, where $k$ is the secret key and $E$ is a block cipher.
-        \item For $i$ from $2$ to $r$, compute $H_i = E_k(H_{i-1} \oplus x)$.
+        \item For $i$ from $2$ to $r$, compute $H_i = E_k(H_{i-1} \oplus x_i)$.
         \item $H(x) = H_r$.
       \end{enumerate}
 
@@ -423,7 +423,7 @@
       \begin{enumerate}
         \item Select an arbitrary $n$ bit block $x_1$.
         \item Obtain the tag $t_1 = E_k(x_1)$.
-        \item Obtain the tag $t_2 = E_k(t_1)$. $t_2$ is the tag of the 2-block message $(x_1, 0)$, since $t_2 = E_k(0 \oplus E_k(x_1)) = E_k(E_k(x_1)) = E_k(t_1)$.
+        \item Obtain the tag $t_2 = E_k(t_1)$. $t_2$ is the tag of the 2-block message $(x_1, 0)$, since $t_2 = E_k(E_k(x_1) \oplus 0) = E_k(E_k(x_1)) = E_k(t_1)$.
       \end{enumerate}
 
       Encrypted CBC-MAC is a variation of CBC-MAC where the last block is encrypted using a separate key $s$, and if $E$ is secure, encrypted CBC-MAC is secure for
