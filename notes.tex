@@ -349,12 +349,12 @@
       Generic attacks on hash functions are attacks that do not exploit any properties specific to a hash function (i.e. the hash function is simply treated as a random function).
 
       \subsubsection{Finding Preimages}
-        To find a preimage for a hash value $y \in \{0, 1\}^n$, random values of $x \in \{0, 1\}^{\leq L}$ need to be selected until $H(x) = L$. The expected number of values of
-        $x$ tested before a match is found is $2^n$, so this attack is computationally infeasible for large enough values of $n$ (e.g. 128).
+        To find a preimage for a hash value $y \in \{0, 1\}^n$ by brute force, random values of $x \in \{0, 1\}^{\leq L}$ need to be selected until $H(x) = L$. The expected number
+        of values of $x$ tested before a match is found is $2^n$, so this attack is computationally infeasible for large enough values of $n$ (e.g. 128).
 
       \subsubsection{Finding Collisions}
-        To find collisions, random values $x \in \{0, 1\}^n$ can be saved along with $H(x)$. The expected number of values $x$ tested before a collision is found is roughly
-        $\sqrt{2^n} = 2^{\frac{n}{2}}$.
+        To find collisions by brute force, random values $x \in \{0, 1\}^n$ can be saved along with $H(x)$. The expected number of values $x$ tested before a collision is found is
+        roughly $\sqrt{2^n} = 2^{\frac{n}{2}}$ (by the so-called ``birthday paradox'').
 
     \subsection{Hash Functions from Block Ciphers}
       Hash functions can be constructed from block ciphers. An example of this is the Davies-Meyer hash function, which works by splitting a message into fixed-sized blocks
