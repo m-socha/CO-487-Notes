@@ -3,6 +3,7 @@
 \usepackage{parskip}
 \usepackage{float}
 \usepackage{amsmath}
+\usepackage{amsfonts}
 
 \let\stdsection\section
 \renewcommand\section{\clearpage\stdsection}
@@ -650,5 +651,114 @@
         The basic RSA signature scheme is actually not secure if SHA-256 is used for $H$.
         To ensure security, a full-domain hash (FDH) paradigm should be used, where a message
         $m \in \{0, 1\}^*$ is mapped to $[0, n-1]$.
+
+  \section{Elliptic Curve Cryptography}
+
+    \subsection{Elliptic Curves}
+      An elliptic curve $E$ over domain $F$ is defined by $E/F: Y^2 = X^3 + aX + b$ and $4a^3 + 27b^2 \neq 0$.
+      $F$ is a domain such as $\mathbb{R}$ or $\mathbb{Z}_p$.
+
+      The set of F-rational points over $E$ is $E(F) = \{(x, y): x, y \in F \land y^2 = x^3 + ax + b\} \cup \{\infty\}$.
+      The point at $\infty$ is a special point simply called the point at infinity.
+
+      \subsubsection{Number of Solutions}
+        Elliptic curves defined over $\mathbb{R}$ have an infinite number of solutions. However, elliptic curves defined over
+        $\mathbb{Z}_p$ where $p$ is a prime number $\geq 5$ have their number of solutions $\#E(\mathbb{Z}_p)$ bounded by
+        $(\sqrt{p} - 1)^2 \leq \#E(\mathbb{Z}_p) \leq (\sqrt{p} + 1)^2$ via Hasse's theorem.
+
+      \subsubsection{Point Addition}
+        A `natural' way to add two points on $E(F)$ to get a third point on $E(F)$ needs to satisfy the following properties:
+        \begin{enumerate}
+          \item Existence of additive identity: $P + \infty = \infty + P = P$ for all $P \in E(F)$.
+          \item Existence of additive inverse: For each $P \in E(F)$, there exists a $Q \in E(F)$ such that $P + Q = Q + P = \infty$.
+          \item Addition is commutative: $P + Q = Q + P$ for all $P, Q \in E(F)$.
+          \item Addition is associative: $(P + Q) + R = P + (Q + R)$ for all $P, Q, R \in E(F)$.
+        \end{enumerate}
+
+        An algebraic description of the addition law on elliptic curves, which satisfies all of the above points, is:
+        \begin{enumerate}
+          \item $P + \infty = \infty + P = P$ for all $P \in E(F)$.
+          \item If $P = (x, y)$, then $-P = (x, -y)$. $P + (-P) = (-P) + P = \infty$. Also, $\infty = -\infty$.
+          \item Let $P = (x_1, y_1) \in E(F)$ and $Q = (x_2, y_2) \in E(F)$, where $P \neq \pm Q$. Then $P + Q = (x_3, y_3)$ where
+            $x_3 = \lambda^2 -  x_1 - x_2$, $y_3 = -y_1 + \lambda(x_1 - x_3)$, and $\lambda = \frac{y_2 - y_1}{x_2 - x_1}$.
+          \item Let $P = (x_1, y_1) \in E(F)$, where $P \neq -P$. Then $P + P = (x_3, y_3)$ where $x_3 = \lambda^2 - 2x_1$,
+            $y_3 = -y_1 + \lambda(x_1 - x_3)$, and $\lambda = \frac{3x_1^2 + a}{2y_1}$.
+        \end{enumerate}
+
+        Point multiplication is defined as repeated addition. For example, $3 P$ = $P + P + P$.
+
+    \subsection{Elliptic Curve Discrete Logarithm Problem}
+      The elliptic curve discrete logarithm problem (ECDLP) is the following. Given $E, p, n = \#E(\mathbb(Z)_p), P \in E(\mathbb(Z)_p)$
+      and $Q \in E(\mathbb(Z)_p)$, find $\ell \in \mathbb(Z)_n$ such that $Q = \ell P$.
+
+      \subsubsection{Brute Force}
+        A simple attempt to solve the ECDLP is to simply try all possible values of $\ell$ (i.e. compute $P, 2P, 3P, \dots$) until $Q$ is
+        found. The attack takes around $O(p)$ point additions, and since an ECDLP instance has around $O(\log{p})$ bits of input, the runtime
+        is fully exponential.
+
+      \subsubsection{Shanks' Algorithm}
+        Shanks' algorithm is a more sophisticated approach to solving the ECDLP problem. It is defined as follows:
+        \begin{enumerate}
+          \item Let $m = \lceil \sqrt{n} \rceil$. By the division algorithm, we find $q, r \in \mathbb{Z}$ such that $\ell = qm + r$, where
+            $0 \leq r \leq m - 1$ and $0 \leq q \leq m - 1$. Rearranging and multiplying both sides by $P$ yields $Q - q(mP) = rP$.
+          \item For each $0 \leq r \leq m - 1$, compute $rP$ and store $(r, rP)$ in a table.
+          \item Compute $M = mP$.
+          \item For each $q$ where $0 \leq q \leq m - 1$, compute $R = Q - qM$ and look it up in the table. If there is a match, then
+            $\ell = qm + r$.
+        \end{enumerate}
+
+        Shanks' algorithm requires around $O(\sqrt{p})$ point additions, making its runtime still fully exponential. It also requires around
+        $O(\sqrt{p})$ of storage.
+
+      \subsubsection{Hardness of ECDLP}
+        The most efficient algorithm of solving the general case of ECDLP is Pollard's algorithm, which is also fully exponential. In contrast,
+        there exist subexponential algorithms for factoring large integers, which forms the security basis for RSA. Thus, encryption schemes based
+        on elliptic curves can use smaller key sizes than their RSA counterparts.
+
+    \subsection{Elliptic Curve Diffie-Hellman Key Agreement}
+      Elliptic curve Diffie-Hellman (ECDH) key agreement allows two communicating parties to use elliptic curve cryptography to agree upon a secret
+      key, which can later be used as a secret key for a symmetric-key encryption scheme.
+
+      \subsubsection{Unauthenticated ECDH}
+        Unauthenticated ECDH is as follows:
+        \begin{enumerate}
+          \item Alice selects an integer $x \mod n$, computes $X = xP$, and sends $X$ to Bob.
+          \item Bob selects an integer $y \mod n$, computes $Y = yP$, and sends $Y$ to Alice.
+          \item Upon receiving $X$, Bob computes $k = KDF(yX)$, where $KDF$ is some key derivation function such as a hash function.
+          \item Upon receiving $Y$, Alice computes $k = KDF(xY)$.
+        \end{enumerate}
+
+        The shared secret key is $k$, since $xY = x(yP) = y(xP) = yX$.
+
+        Unauthenticated ECDH is susceptible to a malicious-intruder-in-the-middle (MITM) attack, where an adversary Eve can intercept $X, Y$ and replace
+        them with points $X', Y'$ of their choosing. Alice and Bob end up with 2 different secret keys $k_1, k_2$, but Eve knows both of these keys, and
+        can decrypt messages passed between the two parties.
+
+      \subsubsection{Authenticated ECDH}
+        Authenticated ECDH overcomes the vulnerability of unauthenticated ECDH by sending signatures along with points $X$ and $Y$. These signatures can
+        be RSA-based signatures (e.g. RSA-FDH), or ECDSA signatures, which are described below.
+
+    \subsection{Elliptic Curve Digital Signature Algorithm}
+      Key generation for the Elliptic curve digital signature algorithm (ECDSA) is done by selecting some private key $a \mod n$ and computing the public
+      key $A = aP$.
+
+      Signature generation is as follows:
+      \begin{enumerate}
+        \item Generate a per-message secret $k \mod n$.
+        \item Compute $m = H(m)$.
+        \item Compute $r = kP \mod n$, and check that $r \neq 0$.
+        \item Compute $s = k^{-1}(m + ar) \mod n$, and check that $s \neq 0$.
+        \item The signature is $(r,s)$.
+      \end{enumerate}
+
+      Signature verification is as follows:
+      \begin{enumerate}
+        \item Obtain an authentic copy of the sender's public key $A$.
+        \item Confirm that $1 \leq r, s \leq n - 1$.
+        \item Compute $m = H(m)$.
+        \item Compute $u_1 = ms^{-1} \mod n$ and $u_2 = rs^{-1} \mod n$.
+        \item Compute $v = u_1P + u_2A \mod n$.
+        \item Accept is $v = r$, else reject.
+      \end{enumerate}
 
 \end{document}
