@@ -761,4 +761,66 @@
         \item Accept is $v = r$, else reject.
       \end{enumerate}
 
+  \section{Key Management}
+
+    Key management refers to techniques for establishing and maintaining cryptographic keying relationships.
+
+    This section will focus on the distribution of authentic public keys. Common ways for distributing public
+    keys are:
+    \begin{itemize}
+      \item Delivery over a trusted channel, such as through a trusted courier or in a face-to-face meeting.
+      \item Storing them in some trusted public resource, such as a public file.
+      \item Using a certification authority.
+    \end{itemize}
+
+    \subsection{Certification Authorities}
+      Certification Authorities (CAs) issue certificates that bind an entity's identity to its public key. A
+      CA certificate consists of:
+      \begin{itemize}
+        \item \textbf{The data part}, which contains an entity's identity, public key, and metadata such as
+          the expiration date.
+        \item \textbf{The signature part}, which contains the CA's signature for the data part.
+      \end{itemize}
+
+      To obtain an authentic copy of some entity's public key, instead of querying the entity itself, one
+      can query a CA, verify that the CA signature is correct, and then extract the entity's public
+      key from the certificate data. CAs also have public keys, but are well known and typically come prepackaged
+      in software that uses CAs.
+
+    \subsection{Public-Key Infrastructure}
+      Public-key infrastructure (PKI) refers to the supporting services (e.g. technological, business, legal) needed
+      to support public-key cryptography on a wide scale. Some components of PKI include
+      \begin{itemize}
+        \item Certificate format.
+        \item Certification process.
+        \item Certificate distribution.
+        \item Trust models.
+      \end{itemize}
+
+    \subsection{SSL/TLS}
+      SSL stands for secure socket layer, and is a deprecated cryptographic protocol first used by Netscape. TLS stands
+      for transport layer security, and is a IETF-approved improvement over SSL. TLS (and formerly SSL) are used to
+      authenticate and encrypt communications over computer networks such as the Internet.
+
+      \subsubsection{Handshake Protocol}
+        The handshake protocol allows the server and client to authenticate one another and select cryptographic keys.
+        Key establishment can take place using either an RSA or elliptic curve based approach, with later versions only
+        supporting the elliptic curve approach.
+
+        The stages of the handshake protocol are:
+        \begin{enumerate}
+          \item The client and server determine one another's security capabilities based on their protocol version, supported
+            algorithms, security levels, etc.
+          \item Server authentication and key exchange, where the server sends its certificate and any key exchange parameters.
+          \item Client authentication and key exchange, where the client sends its certificate and any key exchange parameters.
+        \end{enumerate}
+
+      \subsubsection{Record Protocol}
+        The record protocol is used to encrypt and authenticate transmitted data. Authentication is done using algorithms such
+        as HMAC, and symmetric-key encryption is done using algorithms such as AES.
+
+      \subsubsection{Public-Key Management}
+        SSL/TLS uses CAs for managing public keys. Some root CA public keys come pre-installed on Internet clients, which can
+        in turn be used to certify the intermediate CAs.
+
 \end{document}
