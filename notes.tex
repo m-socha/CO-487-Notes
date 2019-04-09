@@ -746,7 +746,7 @@
       \begin{enumerate}
         \item Generate a per-message secret $k \mod n$.
         \item Compute $m = H(m)$.
-        \item Compute $r = kP \mod n$, and check that $r \neq 0$.
+        \item Compute $r = x(kP) \mod n$ (i.e. the x-coordinate of $kP$), and check that $r \neq 0$.
         \item Compute $s = k^{-1}(m + ar) \mod n$, and check that $s \neq 0$.
         \item The signature is $(r,s)$.
       \end{enumerate}
@@ -757,7 +757,7 @@
         \item Confirm that $1 \leq r, s \leq n - 1$.
         \item Compute $m = H(m)$.
         \item Compute $u_1 = ms^{-1} \mod n$ and $u_2 = rs^{-1} \mod n$.
-        \item Compute $v = u_1P + u_2A \mod n$.
+        \item Compute $v = x(u_1P + u_2A) \mod n$.
         \item Accept is $v = r$, else reject.
       \end{enumerate}
 
